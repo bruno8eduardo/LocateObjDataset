@@ -1,0 +1,31 @@
+Orientation error analysis
+==========================
+Input rows: 252
+
+Factors ranked by absolute Pearson correlation:
+- base_pitch_degrees: r=0.538072, p=2.578949e-20, n=252
+- pitch_error_degrees: r=0.313719, p=3.689492e-07, n=252
+- perturbation=roll: r=-0.195602, p=1.809454e-03, n=252
+- perturbation=yaw: r=-0.124214, p=4.887647e-02, n=252
+- perturbation=yaw+roll: r=-0.123850, p=4.954771e-02, n=252
+- perturbation=yaw+pitch: r=0.116572, p=6.465724e-02, n=252
+- perturbation=yaw+pitch+roll: r=0.115680, p=6.674414e-02, n=252
+- perturbation=pitch: r=0.106217, p=9.246627e-02, n=252
+- perturbation=pitch+roll: r=0.105197, p=9.565790e-02, n=252
+- roll_error_degrees: r=-0.069703, p=2.703131e-01, n=252
+- height_m: r=0.051301, p=4.174427e-01, n=252
+- yaw_error_degrees: r=-0.011181, p=8.598106e-01, n=252
+
+Mean horizontal error by perturbation:
+- yaw+pitch: 1.188191 m
+- yaw+pitch+roll: 1.184809 m
+- pitch: 1.148918 m
+- pitch+roll: 1.145049 m
+- yaw+roll: 0.276285 m
+- yaw: 0.274904 m
+- roll: 0.004131 m
+
+Interpretation note:
+Pearson r measures marginal linear association, not causality.
+Pitch can have a nonlinear effect, so inspect the pitch plot together with the correlation ranking.
+Perturbation indicators are related by design and should not be interpreted as independent experiments.
