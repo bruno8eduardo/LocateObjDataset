@@ -2,7 +2,7 @@
 
 The script reads the semicolon-delimited file produced by
 calculate_orientation_errors.py, calculates Pearson correlations and
-p-values, and creates tables and plots in an output directory.
+p-values, and creates plots plus matching CSV files in an output directory.
 
 Example:
     python analyze_orientation_errors.py
@@ -152,6 +152,11 @@ def save_analysis_tables(
 
     ranking.to_csv(output_dir / "pearson_ranking.csv", sep=";", index=False)
     correlation_matrix.to_csv(output_dir / "pearson_matrix.csv", sep=";")
+    # Keep the existing matrix filename and also use the plot's basename so every
+    # generated image has an immediately discoverable tabular counterpart.
+    correlation_matrix.rename_axis("factor").to_csv(
+        output_dir / "pearson_heatmap.csv", sep=";"
+    )
     perturbation_summary.to_csv(
         output_dir / "perturbation_summary.csv", sep=";", index=False
     )
@@ -228,18 +233,22 @@ def plot_pearson_heatmap(
 def plot_error_by_pitch(dataframe: pd.DataFrame, output_dir: Path, dpi: int) -> None:
     """Plot mean horizontal error by pitch for every perturbation."""
     grouped = (
-        dataframe.groupby(["base_pitch_degrees", "perturbation"], as_index=False)[
-            TARGET_COLUMN
-        ]
-        .mean()
-        .sort_values("base_pitch_degrees")
+        dataframe.groupby(["base_pitch_degrees", "perturbation"], as_index=False)
+        .agg(
+            mean_horizontal_error_m=(TARGET_COLUMN, "mean"),
+            sample_count=(TARGET_COLUMN, "count"),
+        )
+        .sort_values(["base_pitch_degrees", "perturbation"])
+    )
+    grouped.to_csv(
+        output_dir / "horizontal_error_by_pitch.csv", sep=";", index=False
     )
 
     figure, axis = plt.subplots(figsize=(10, 6))
     for perturbation, values in grouped.groupby("perturbation"):
         axis.plot(
             values["base_pitch_degrees"],
-            values[TARGET_COLUMN],
+            values["mean_horizontal_error_m"],
             marker="o",
             linewidth=1.6,
             label=perturbation,
@@ -259,16 +268,22 @@ def plot_error_by_pitch(dataframe: pd.DataFrame, output_dir: Path, dpi: int) -> 
 def plot_error_by_height(dataframe: pd.DataFrame, output_dir: Path, dpi: int) -> None:
     """Plot mean horizontal error by height for every perturbation."""
     grouped = (
-        dataframe.groupby(["height_m", "perturbation"], as_index=False)[TARGET_COLUMN]
-        .mean()
-        .sort_values("height_m")
+        dataframe.groupby(["height_m", "perturbation"], as_index=False)
+        .agg(
+            mean_horizontal_error_m=(TARGET_COLUMN, "mean"),
+            sample_count=(TARGET_COLUMN, "count"),
+        )
+        .sort_values(["height_m", "perturbation"])
+    )
+    grouped.to_csv(
+        output_dir / "horizontal_error_by_height.csv", sep=";", index=False
     )
 
     figure, axis = plt.subplots(figsize=(10, 6))
     for perturbation, values in grouped.groupby("perturbation"):
         axis.plot(
             values["height_m"],
-            values[TARGET_COLUMN],
+            values["mean_horizontal_error_m"],
             marker="o",
             linewidth=1.6,
             label=perturbation,
@@ -289,8 +304,28 @@ def plot_error_by_perturbation(
 ) -> None:
     """Plot horizontal-error distributions ordered by their mean."""
     categories = perturbation_summary["perturbation"].tolist()
+    plotted_rows = dataframe[TARGET_COLUMN].notna() & dataframe["perturbation"].isin(
+        categories
+    )
+    distribution_data = dataframe.loc[
+        plotted_rows, ["perturbation", TARGET_COLUMN]
+    ].copy()
+    category_order = {category: order for order, category in enumerate(categories)}
+    distribution_data["_plot_order"] = distribution_data["perturbation"].map(
+        category_order
+    )
+    distribution_data = (
+        distribution_data.sort_values("_plot_order", kind="stable")
+        .drop(columns="_plot_order")
+        .reset_index(drop=True)
+    )
+    distribution_data.to_csv(
+        output_dir / "horizontal_error_by_perturbation.csv", sep=";", index=False
+    )
     distributions = [
-        dataframe.loc[dataframe["perturbation"] == category, TARGET_COLUMN].dropna()
+        distribution_data.loc[
+            distribution_data["perturbation"] == category, TARGET_COLUMN
+        ]
         for category in categories
     ]
 
