@@ -1,4 +1,4 @@
-height_m;perturbation;mean_horizontal_error_m;sample_count
+height_m;perturbation;mean_error_m;sample_count
 90.0;pitch;0.9775554603550414;18
 90.0;pitch+roll;0.9742902049241144;18
 90.0;roll;0.003538682802609506;18

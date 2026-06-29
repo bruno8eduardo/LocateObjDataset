@@ -1,4 +1,4 @@
-"""Analyze which experimental factors are associated with horizontal error.
+"""Analyze which experimental factors are associated with  error.
 
 The script reads the semicolon-delimited file produced by
 calculate_orientation_errors.py, calculates Pearson correlations and
@@ -25,7 +25,7 @@ import pandas as pd
 from scipy.stats import pearsonr
 
 
-TARGET_COLUMN = "horizontal_error_m"
+TARGET_COLUMN = "error_m"
 DEFAULT_CSV = Path("orientation_errors.csv")
 DEFAULT_OUTPUT_DIR = Path("orientation_error_analysis")
 
@@ -174,7 +174,7 @@ def plot_pearson_ranking(
     bars = axis.barh(plot_data["factor"], plot_data["pearson_r"], color=colors)
     axis.axvline(0.0, color="black", linewidth=0.8)
     axis.set_xlim(-1.0, 1.0)
-    axis.set_xlabel("Pearson correlation with horizontal_error_m")
+    axis.set_xlabel("Pearson correlation with error_m")
     axis.set_title("Experimental factors ranked by absolute Pearson correlation")
     axis.grid(axis="x", alpha=0.25)
 
@@ -231,24 +231,24 @@ def plot_pearson_heatmap(
 
 
 def plot_error_by_pitch(dataframe: pd.DataFrame, output_dir: Path, dpi: int) -> None:
-    """Plot mean horizontal error by pitch for every perturbation."""
+    """Plot mean  error by pitch for every perturbation."""
     grouped = (
         dataframe.groupby(["base_pitch_degrees", "perturbation"], as_index=False)
         .agg(
-            mean_horizontal_error_m=(TARGET_COLUMN, "mean"),
+            mean_error_m=(TARGET_COLUMN, "mean"),
             sample_count=(TARGET_COLUMN, "count"),
         )
         .sort_values(["base_pitch_degrees", "perturbation"])
     )
     grouped.to_csv(
-        output_dir / "horizontal_error_by_pitch.csv", sep=";", index=False
+        output_dir / "error_by_pitch.csv", sep=";", index=False
     )
 
     figure, axis = plt.subplots(figsize=(10, 6))
     for perturbation, values in grouped.groupby("perturbation"):
         axis.plot(
             values["base_pitch_degrees"],
-            values["mean_horizontal_error_m"],
+            values["mean_error_m"],
             marker="o",
             linewidth=1.6,
             label=perturbation,
@@ -256,53 +256,53 @@ def plot_error_by_pitch(dataframe: pd.DataFrame, output_dir: Path, dpi: int) -> 
 
     axis.invert_xaxis()
     axis.set_xlabel("Base pitch (degrees)")
-    axis.set_ylabel("Mean horizontal error (m)")
-    axis.set_title("Horizontal error by pitch and perturbation")
+    axis.set_ylabel("Mean  error (m)")
+    axis.set_title("Error by pitch and perturbation")
     axis.grid(alpha=0.25)
     axis.legend(title="Perturbation", bbox_to_anchor=(1.02, 1), loc="upper left")
     figure.tight_layout()
-    figure.savefig(output_dir / "horizontal_error_by_pitch.png", dpi=dpi)
+    figure.savefig(output_dir / "error_by_pitch.png", dpi=dpi)
     plt.close(figure)
 
 
 def plot_error_by_height(dataframe: pd.DataFrame, output_dir: Path, dpi: int) -> None:
-    """Plot mean horizontal error by height for every perturbation."""
+    """Plot mean  error by height for every perturbation."""
     grouped = (
         dataframe.groupby(["height_m", "perturbation"], as_index=False)
         .agg(
-            mean_horizontal_error_m=(TARGET_COLUMN, "mean"),
+            mean_error_m=(TARGET_COLUMN, "mean"),
             sample_count=(TARGET_COLUMN, "count"),
         )
         .sort_values(["height_m", "perturbation"])
     )
     grouped.to_csv(
-        output_dir / "horizontal_error_by_height.csv", sep=";", index=False
+        output_dir / "error_by_height.csv", sep=";", index=False
     )
 
     figure, axis = plt.subplots(figsize=(10, 6))
     for perturbation, values in grouped.groupby("perturbation"):
         axis.plot(
             values["height_m"],
-            values["mean_horizontal_error_m"],
+            values["mean_error_m"],
             marker="o",
             linewidth=1.6,
             label=perturbation,
         )
 
     axis.set_xlabel("Drone height (m)")
-    axis.set_ylabel("Mean horizontal error (m)")
-    axis.set_title("Horizontal error by height and perturbation")
+    axis.set_ylabel("Mean  error (m)")
+    axis.set_title("Error by height and perturbation")
     axis.grid(alpha=0.25)
     axis.legend(title="Perturbation", bbox_to_anchor=(1.02, 1), loc="upper left")
     figure.tight_layout()
-    figure.savefig(output_dir / "horizontal_error_by_height.png", dpi=dpi)
+    figure.savefig(output_dir / "error_by_height.png", dpi=dpi)
     plt.close(figure)
 
 
 def plot_error_by_perturbation(
     dataframe: pd.DataFrame, perturbation_summary: pd.DataFrame, output_dir: Path, dpi: int
 ) -> None:
-    """Plot horizontal-error distributions ordered by their mean."""
+    """Plot error distributions ordered by their mean."""
     categories = perturbation_summary["perturbation"].tolist()
     plotted_rows = dataframe[TARGET_COLUMN].notna() & dataframe["perturbation"].isin(
         categories
@@ -320,7 +320,7 @@ def plot_error_by_perturbation(
         .reset_index(drop=True)
     )
     distribution_data.to_csv(
-        output_dir / "horizontal_error_by_perturbation.csv", sep=";", index=False
+        output_dir / "error_by_perturbation.csv", sep=";", index=False
     )
     distributions = [
         distribution_data.loc[
@@ -340,12 +340,12 @@ def plot_error_by_perturbation(
         box.set_facecolor("#86BBD8")
 
     axis.set_xlabel("Perturbation")
-    axis.set_ylabel("Horizontal error (m)")
-    axis.set_title("Horizontal-error distribution by perturbation")
+    axis.set_ylabel("Error (m)")
+    axis.set_title("Error distribution by perturbation")
     axis.tick_params(axis="x", rotation=30)
     axis.grid(axis="y", alpha=0.25)
     figure.tight_layout()
-    figure.savefig(output_dir / "horizontal_error_by_perturbation.png", dpi=dpi)
+    figure.savefig(output_dir / "error_by_perturbation.png", dpi=dpi)
     plt.close(figure)
 
 
@@ -370,7 +370,7 @@ def save_text_summary(
             f"p={row.p_value:.6e}, n={row.sample_count}"
         )
 
-    lines.extend(["", "Mean horizontal error by perturbation:"])
+    lines.extend(["", "Mean  error by perturbation:"])
     for row in perturbation_summary.itertuples(index=False):
         lines.append(f"- {row.perturbation}: {row.mean:.6f} m")
 
@@ -391,7 +391,7 @@ def save_text_summary(
 def create_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description=(
-            "Calculate Pearson correlations and plots for horizontal_error_m."
+            "Calculate Pearson correlations and plots for error_m."
         )
     )
     parser.add_argument(
@@ -438,7 +438,7 @@ def main() -> None:
     save_text_summary(dataframe, ranking, perturbation_summary, arguments.output_dir)
 
     print(f"Analysis saved to {arguments.output_dir.resolve()}")
-    print("\nStrongest Pearson correlations with horizontal_error_m:")
+    print("\nStrongest Pearson correlations with error_m:")
     print(
         ranking[["factor", "pearson_r", "p_value"]]
         .head(10)

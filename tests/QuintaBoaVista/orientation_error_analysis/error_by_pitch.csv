@@ -1,4 +1,4 @@
-base_pitch_degrees;perturbation;mean_horizontal_error_m;sample_count
+base_pitch_degrees;perturbation;mean_error_m;sample_count
 -90.0;pitch;0.1832676762452679;8
 -90.0;pitch+roll;0.1820599641090963;8
 -90.0;roll;0.0017086458995801625;8

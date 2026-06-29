@@ -1,4 +1,4 @@
-height_m;base_yaw_degrees;base_pitch_degrees;base_roll_degrees;perturbation;yaw_error_degrees;pitch_error_degrees;roll_error_degrees;image_width_px;image_height_px;pixel_x;pixel_y;reference_east_m;reference_north_m;calculated_east_m;calculated_north_m;east_error_m;north_error_m;horizontal_error_m
+height_m;base_yaw_degrees;base_pitch_degrees;base_roll_degrees;perturbation;yaw_error_degrees;pitch_error_degrees;roll_error_degrees;image_width_px;image_height_px;pixel_x;pixel_y;reference_east_m;reference_north_m;calculated_east_m;calculated_north_m;east_error_m;north_error_m;error_m
 90.0;0.0;-10.0;0.0;yaw;0.1;0.0;0.0;1920;1080;960.0;540.0;1.7694017820656394;521.4611891580217;2.679520092265861;521.4573067402927;0.9101183102002215;-0.003882417729073495;0.9101265910460641
 90.0;0.0;-10.0;0.0;pitch;0.0;0.1;0.0;1920;1080;960.0;540.0;1.7694017820656394;521.4611891580217;1.7874803199473959;526.9470052673939;0.018078537881756507;5.485816109372195;5.4858458982530145
 90.0;0.0;-10.0;0.0;roll;0.0;0.0;0.1;1920;1080;960.0;540.0;1.7694017820656394;521.4611891580217;1.772686820432723;521.4430151756654;0.0032850383670837147;-0.018173982356302076;0.018468489698954576

@@ -169,7 +169,7 @@ def calculate_rows(
                             "calculated_north_m": calculated_position[1],
                             "east_error_m": difference[0],
                             "north_error_m": difference[1],
-                            "horizontal_error_m": np.linalg.norm(difference[:2]),
+                            "error_m": np.linalg.norm(difference[:2]),
                         }
                     )
 

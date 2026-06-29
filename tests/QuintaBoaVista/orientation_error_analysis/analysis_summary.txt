@@ -16,7 +16,7 @@ Factors ranked by absolute Pearson correlation:
 - yaw_error_degrees: r=0.002108, p=9.623478e-01, n=504
 - roll_error_degrees: r=0.002088, p=9.627083e-01, n=504
 
-Mean horizontal error by perturbation:
+Mean  error by perturbation:
 - yaw+pitch: 1.208700 m
 - yaw+pitch+roll: 1.201892 m
 - pitch: 1.169694 m
