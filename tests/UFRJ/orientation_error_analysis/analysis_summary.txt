@@ -1,29 +1,29 @@
 Orientation error analysis
 ==========================
-Input rows: 252
+Input rows: 504
 
 Factors ranked by absolute Pearson correlation:
-- base_pitch_degrees: r=0.538072, p=2.578949e-20, n=252
-- pitch_error_degrees: r=0.313719, p=3.689492e-07, n=252
-- perturbation=roll: r=-0.195602, p=1.809454e-03, n=252
-- perturbation=yaw: r=-0.124214, p=4.887647e-02, n=252
-- perturbation=yaw+roll: r=-0.123850, p=4.954771e-02, n=252
-- perturbation=yaw+pitch: r=0.116572, p=6.465724e-02, n=252
-- perturbation=yaw+pitch+roll: r=0.115680, p=6.674414e-02, n=252
-- perturbation=pitch: r=0.106217, p=9.246627e-02, n=252
-- perturbation=pitch+roll: r=0.105197, p=9.565790e-02, n=252
-- roll_error_degrees: r=-0.069703, p=2.703131e-01, n=252
-- height_m: r=0.051301, p=4.174427e-01, n=252
-- yaw_error_degrees: r=-0.011181, p=8.598106e-01, n=252
+- base_pitch_degrees: r=0.538882, p=2.649840e-39, n=504
+- perturbation=roll: r=-0.196267, p=9.059283e-06, n=504
+- perturbation=yaw: r=-0.124167, p=5.247391e-03, n=504
+- perturbation=yaw+roll: r=-0.123799, p=5.384505e-03, n=504
+- perturbation=yaw+pitch: r=0.116755, p=8.700313e-03, n=504
+- perturbation=yaw+pitch+roll: r=0.115870, p=9.225032e-03, n=504
+- perturbation=pitch: r=0.106311, p=1.696236e-02, n=504
+- perturbation=pitch+roll: r=0.105297, p=1.804886e-02, n=504
+- height_m: r=0.051477, p=2.486825e-01, n=504
+- pitch_error_degrees: r=0.004157, p=9.258211e-01, n=504
+- yaw_error_degrees: r=0.002084, p=9.627684e-01, n=504
+- roll_error_degrees: r=0.002071, p=9.630056e-01, n=504
 
 Mean horizontal error by perturbation:
-- yaw+pitch: 1.188191 m
-- yaw+pitch+roll: 1.184809 m
-- pitch: 1.148918 m
-- pitch+roll: 1.145049 m
-- yaw+roll: 0.276285 m
+- yaw+pitch: 1.179704 m
+- yaw+pitch+roll: 1.176382 m
+- pitch: 1.140481 m
+- pitch+roll: 1.136672 m
+- yaw+roll: 0.276289 m
 - yaw: 0.274904 m
-- roll: 0.004131 m
+- roll: 0.004128 m
 
 Interpretation note:
 Pearson r measures marginal linear association, not causality.

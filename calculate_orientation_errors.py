@@ -2,8 +2,8 @@
 
 For each configured height and pitch, the ray from the image center is
 intersected with the ENU plane z=0. The reference position is compared with
-the positions calculated after adding 0.1 degree to different combinations
-of yaw, pitch, and roll.
+the positions calculated after adding both +0.1 and -0.1 degree to different
+combinations of yaw, pitch, and roll.
 
 Examples:
     python calculate_orientation_errors.py --resolution 1920 1080
@@ -25,21 +25,17 @@ from utils.geometry import Geometry
 
 HEIGHTS_M = (90.0, 100.0, 110.0, 120.0)
 PITCHES_DEGREES = tuple(float(pitch) for pitch in range(-10, -91, -10))
-ANGULAR_ERROR_DEGREES = 0.1
+ANGULAR_ERROR_VALUES_DEGREES = (0.1, -0.1)
 
-# Values are errors added to (yaw, pitch, roll), in that order.
+# Flags indicate which of (yaw, pitch, roll) receive the angular error.
 PERTURBATIONS = {
-    "yaw": (ANGULAR_ERROR_DEGREES, 0.0, 0.0),
-    "pitch": (0.0, ANGULAR_ERROR_DEGREES, 0.0),
-    "roll": (0.0, 0.0, ANGULAR_ERROR_DEGREES),
-    "yaw+pitch": (ANGULAR_ERROR_DEGREES, ANGULAR_ERROR_DEGREES, 0.0),
-    "yaw+roll": (ANGULAR_ERROR_DEGREES, 0.0, ANGULAR_ERROR_DEGREES),
-    "pitch+roll": (0.0, ANGULAR_ERROR_DEGREES, ANGULAR_ERROR_DEGREES),
-    "yaw+pitch+roll": (
-        ANGULAR_ERROR_DEGREES,
-        ANGULAR_ERROR_DEGREES,
-        ANGULAR_ERROR_DEGREES,
-    ),
+    "yaw": (True, False, False),
+    "pitch": (False, True, False),
+    "roll": (False, False, True),
+    "yaw+pitch": (True, True, False),
+    "yaw+roll": (True, False, True),
+    "pitch+roll": (False, True, True),
+    "yaw+pitch+roll": (True, True, True),
 }
 
 
@@ -133,41 +129,49 @@ def calculate_rows(
                 center_pixel, intrinsic_matrix, reference_rotation, drone_position
             )
 
-            for perturbation, (yaw_error, pitch_error, roll_error) in PERTURBATIONS.items():
-                erroneous_yaw = base_yaw + yaw_error
-                erroneous_pitch = base_pitch + pitch_error
-                erroneous_roll = base_roll + roll_error
-                erroneous_rotation = Geometry.yaw_pitch_roll_to_rotation_matrix(
-                    erroneous_yaw, erroneous_pitch, erroneous_roll
-                )
-                calculated_position = get_intersection_from_click(
-                    center_pixel, intrinsic_matrix, erroneous_rotation, drone_position
-                )
+            for angular_error in ANGULAR_ERROR_VALUES_DEGREES:
+                for perturbation, affected_axes in PERTURBATIONS.items():
+                    yaw_error, pitch_error, roll_error = (
+                        angular_error if is_affected else 0.0
+                        for is_affected in affected_axes
+                    )
+                    erroneous_yaw = base_yaw + yaw_error
+                    erroneous_pitch = base_pitch + pitch_error
+                    erroneous_roll = base_roll + roll_error
+                    erroneous_rotation = Geometry.yaw_pitch_roll_to_rotation_matrix(
+                        erroneous_yaw, erroneous_pitch, erroneous_roll
+                    )
+                    calculated_position = get_intersection_from_click(
+                        center_pixel,
+                        intrinsic_matrix,
+                        erroneous_rotation,
+                        drone_position,
+                    )
 
-                difference = calculated_position - reference_position
-                rows.append(
-                    {
-                        "height_m": height,
-                        "base_yaw_degrees": base_yaw,
-                        "base_pitch_degrees": base_pitch,
-                        "base_roll_degrees": base_roll,
-                        "perturbation": perturbation,
-                        "yaw_error_degrees": yaw_error,
-                        "pitch_error_degrees": pitch_error,
-                        "roll_error_degrees": roll_error,
-                        "image_width_px": image_width,
-                        "image_height_px": image_height,
-                        "pixel_x": center_pixel[0],
-                        "pixel_y": center_pixel[1],
-                        "reference_east_m": reference_position[0],
-                        "reference_north_m": reference_position[1],
-                        "calculated_east_m": calculated_position[0],
-                        "calculated_north_m": calculated_position[1],
-                        "east_error_m": difference[0],
-                        "north_error_m": difference[1],
-                        "horizontal_error_m": np.linalg.norm(difference[:2]),
-                    }
-                )
+                    difference = calculated_position - reference_position
+                    rows.append(
+                        {
+                            "height_m": height,
+                            "base_yaw_degrees": base_yaw,
+                            "base_pitch_degrees": base_pitch,
+                            "base_roll_degrees": base_roll,
+                            "perturbation": perturbation,
+                            "yaw_error_degrees": yaw_error,
+                            "pitch_error_degrees": pitch_error,
+                            "roll_error_degrees": roll_error,
+                            "image_width_px": image_width,
+                            "image_height_px": image_height,
+                            "pixel_x": center_pixel[0],
+                            "pixel_y": center_pixel[1],
+                            "reference_east_m": reference_position[0],
+                            "reference_north_m": reference_position[1],
+                            "calculated_east_m": calculated_position[0],
+                            "calculated_north_m": calculated_position[1],
+                            "east_error_m": difference[0],
+                            "north_error_m": difference[1],
+                            "horizontal_error_m": np.linalg.norm(difference[:2]),
+                        }
+                    )
 
     return rows
 
@@ -196,7 +200,7 @@ def save_csv(rows: list[dict[str, object]], path: Path) -> None:
 
 def create_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="Calculate position errors for 0.1-degree attitude perturbations."
+        description="Calculate position errors for +/-0.1-degree attitude perturbations."
     )
     parser.add_argument(
         "--k",
