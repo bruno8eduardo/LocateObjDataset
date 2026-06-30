@@ -22,6 +22,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from matplotlib.transforms import ScaledTranslation
 from scipy.stats import pearsonr
 
 
@@ -230,6 +231,66 @@ def plot_pearson_heatmap(
     plt.close(figure)
 
 
+SERIES_MARKERS = ("o", "s", "^", "D", "v", "P", "X")
+SERIES_LINESTYLES = (
+    "-",
+    "--",
+    "-.",
+    ":",
+    (0, (5, 1)),
+    (0, (3, 1, 1, 1)),
+    (0, (1, 1)),
+)
+
+
+def plot_perturbation_series(
+    figure: plt.Figure,
+    axis: plt.Axes,
+    grouped: pd.DataFrame,
+    x_column: str,
+) -> None:
+    """Plot distinguishable series, including when their values coincide."""
+    perturbations = sorted(grouped["perturbation"].dropna().unique())
+    offsets = np.linspace(-8.0, 8.0, len(perturbations))
+    color_map = plt.get_cmap("tab10")
+
+    for index, (perturbation, offset_points) in enumerate(
+        zip(perturbations, offsets)
+    ):
+        values = grouped.loc[grouped["perturbation"] == perturbation]
+        display_offset = ScaledTranslation(
+            offset_points / 72.0, 0.0, figure.dpi_scale_trans
+        )
+        axis.plot(
+            values[x_column],
+            values["mean_error_m"],
+            color=color_map(index % 10),
+            linestyle=SERIES_LINESTYLES[index % len(SERIES_LINESTYLES)],
+            marker=SERIES_MARKERS[index % len(SERIES_MARKERS)],
+            markersize=7.0,
+            markerfacecolor="white",
+            markeredgewidth=1.5,
+            linewidth=1.8,
+            transform=axis.transData + display_offset,
+            label=perturbation,
+        )
+
+    data_limits = grouped[[x_column, "mean_error_m"]].dropna().to_numpy()
+    if len(data_limits):
+        axis.update_datalim(data_limits)
+        axis.autoscale_view()
+    axis.set_xticks(sorted(grouped[x_column].dropna().unique()))
+    # figure.text(
+    #     0.5,
+    #     0.01,
+    #     "Series are shifted horizontally by a few display pixels only; "
+    #     "CSV values are unchanged.",
+    #     ha="center",
+    #     fontsize=8,
+    #     color="dimgray",
+    # )
+
+
 def plot_error_by_pitch(dataframe: pd.DataFrame, output_dir: Path, dpi: int) -> None:
     """Plot mean  error by pitch for every perturbation."""
     grouped = (
@@ -244,15 +305,8 @@ def plot_error_by_pitch(dataframe: pd.DataFrame, output_dir: Path, dpi: int) -> 
         output_dir / "error_by_pitch.csv", sep=";", index=False
     )
 
-    figure, axis = plt.subplots(figsize=(10, 6))
-    for perturbation, values in grouped.groupby("perturbation"):
-        axis.plot(
-            values["base_pitch_degrees"],
-            values["mean_error_m"],
-            marker="o",
-            linewidth=1.6,
-            label=perturbation,
-        )
+    figure, axis = plt.subplots(figsize=(11, 6.5))
+    plot_perturbation_series(figure, axis, grouped, "base_pitch_degrees")
 
     axis.invert_xaxis()
     axis.set_xlabel("Base pitch (degrees)")
@@ -260,7 +314,7 @@ def plot_error_by_pitch(dataframe: pd.DataFrame, output_dir: Path, dpi: int) -> 
     axis.set_title("Error by pitch and perturbation")
     axis.grid(alpha=0.25)
     axis.legend(title="Perturbation", bbox_to_anchor=(1.02, 1), loc="upper left")
-    figure.tight_layout()
+    figure.tight_layout(rect=(0, 0.04, 1, 1))
     figure.savefig(output_dir / "error_by_pitch.png", dpi=dpi)
     plt.close(figure)
 
@@ -279,22 +333,15 @@ def plot_error_by_height(dataframe: pd.DataFrame, output_dir: Path, dpi: int) ->
         output_dir / "error_by_height.csv", sep=";", index=False
     )
 
-    figure, axis = plt.subplots(figsize=(10, 6))
-    for perturbation, values in grouped.groupby("perturbation"):
-        axis.plot(
-            values["height_m"],
-            values["mean_error_m"],
-            marker="o",
-            linewidth=1.6,
-            label=perturbation,
-        )
+    figure, axis = plt.subplots(figsize=(11, 6.5))
+    plot_perturbation_series(figure, axis, grouped, "height_m")
 
     axis.set_xlabel("Drone height (m)")
     axis.set_ylabel("Mean  error (m)")
     axis.set_title("Error by height and perturbation")
     axis.grid(alpha=0.25)
     axis.legend(title="Perturbation", bbox_to_anchor=(1.02, 1), loc="upper left")
-    figure.tight_layout()
+    figure.tight_layout(rect=(0, 0.04, 1, 1))
     figure.savefig(output_dir / "error_by_height.png", dpi=dpi)
     plt.close(figure)
 
